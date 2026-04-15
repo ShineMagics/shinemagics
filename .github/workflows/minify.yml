@@ -11,15 +11,25 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Minify JS and CSS
-        uses: nizaron/minify-all-action@master
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          directory: './'
+          node-version: '20'
 
-      - name: Commit Minified Files
+      - name: Install Minifiers
+        run: npm install -g terser clean-css-cli
+
+      - name: Run Minification
+        run: |
+          # Minify JS
+          terser script.js -o script.js
+          # Minify CSS
+          cleancss -o style.css style.css
+
+      - name: Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "chore: minify js and css" || echo "No changes to commit"
+          git add script.js style.css
+          git commit -m "Optimize: Minify JS and CSS" || exit 0
           git push
